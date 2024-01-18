@@ -1,11 +1,10 @@
+import {ClerkProvider} from "@clerk/nextjs";
 import type {Metadata} from "next";
 import {Inter} from "next/font/google";
 import "./globals.css";
-import {ClerkProvider} from "@clerk/nextjs";
 
-import {Toaster} from "sonner";
 import QueryProvider from "@/components/provider/query-provider";
-import {queryTodos} from "@/actions/todos";
+import {Toaster} from "sonner";
 
 // const inter = Inter({subsets: ["latin"]});
 const inter = Inter({subsets: ["latin"]});
