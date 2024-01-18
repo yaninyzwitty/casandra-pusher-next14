@@ -3,6 +3,7 @@ import cassandraDb from '@/cassandra';
 import { messageSchema } from '@/lib/schema';
 import { auth, currentUser } from '@clerk/nextjs';
 import { revalidatePath } from 'next/cache';
+import { serverPusher } from '@/lib/pusher';
 import * as z from 'zod'
 
 export const message = async (values: z.infer<typeof messageSchema>) => {
@@ -24,6 +25,9 @@ try {
     if(!roomId) {
         return { error: "Room id required!"};
     };
+
+
+    serverPusher.trigger(roomId, 'new-message', message)
 
 
 

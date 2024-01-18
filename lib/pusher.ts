@@ -3,21 +3,21 @@ import PusherServer from 'pusher';
 
 export const serverPusher = new PusherServer({
     appId: process.env.PUSHER_APP_ID!,
-    key: process.env.PUSHER_API_KEY!,
-    cluster: process.env.PUSHER_CLUSTER!,
-    useTLS: true,
-    secret: process.env.PUSHER_API_SECRET!,
+  key: process.env.NEXT_PUBLIC_PUSHER_APP_KEY!,
+  secret: process.env.PUSHER_APP_SECRET!,
+  cluster: 'mt1',
+  useTLS: true,
 
 });
 
-
-export const clientPusher = new ClientPusher(process.env.PUSHER_APP_ID!, {
-    cluster: process.env.PUSHER_CLUSTER! || 'mt1',
+export const pusherClient = new ClientPusher(process.env.NEXT_PUBLIC_PUSHER_APP_KEY!, {
+    cluster: 'mt1',
     authEndpoint: '/api/pusher-auth',
     authTransport: 'ajax',
     auth: {
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }
-})
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  })
+  

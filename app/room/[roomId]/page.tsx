@@ -1,8 +1,8 @@
 import {messages} from "@/actions/messages";
-import MessageForm from "@/components/message-form";
-import Messages from "@/components/messages";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
+import MessageForm from "./message-form";
+import Messages from "./messages";
 
 type Props = {
   params: {
@@ -12,7 +12,7 @@ type Props = {
 
 async function RoomIdPage({params: {roomId}}: Props) {
   const initialMessages = await messages(roomId);
-  console.log(initialMessages);
+
   return (
     <div className="flex items-center justify-center p-5 space-y-8 flex-col">
       <div className="flex items-center ">
@@ -23,7 +23,8 @@ async function RoomIdPage({params: {roomId}}: Props) {
       </div>
 
       <div className="flex items-center flex-col space-y-4">
-        <MessageForm />
+        {/* go from here */}
+        <MessageForm initialMessages={initialMessages} />
         <Messages initialMessages={initialMessages} roomId={roomId} />
       </div>
     </div>
