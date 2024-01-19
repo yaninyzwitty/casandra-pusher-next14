@@ -1,1 +1,0 @@
-export const getMessages = fetch('/api/messages').then(res => res.json());

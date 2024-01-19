@@ -1,13 +1,9 @@
 "use client";
-import {pusherClient} from "@/lib/pusher";
+import {fetcher} from "@/lib/fetchMessages";
 import {Message} from "@/types";
 import {FC, useEffect, useState} from "react";
-
-type PusherProps = {
-  message: string;
-  roomId: string;
-  messageId: string;
-};
+import useSWR from "swr";
+import {pusherClient} from "@/lib/pusher";
 
 interface MessagesProps {
   initialMessages: Message[];
@@ -15,33 +11,38 @@ interface MessagesProps {
 }
 
 const Messages: FC<MessagesProps> = ({initialMessages, roomId}) => {
-  const [incomingMessages, setIncomingMessages] = useState<string[]>([]);
+  const {
+    data: messages,
+    isLoading,
+    mutate,
+  } = useSWR<Message[]>("/api/messages", () => fetcher(roomId as string));
 
   useEffect(() => {
-    pusherClient.subscribe(roomId);
+    const channel = pusherClient.subscribe(roomId);
+    channel.bind("incoming-message", async (data: Message) => {
+      if (messages?.find((message) => message.messageId === data.messageId))
+        return;
 
-    pusherClient.bind(
-      "incoming-message",
-      ({message, roomId, messageId}: PusherProps) => {
-        if (initialMessages.find((message) => message.messageId === messageId))
-          return;
-
-        setIncomingMessages((prev) => [...prev, message]);
+      if (!messages) {
+        await mutate(fetcher(roomId));
+      } else {
+        mutate(fetcher(roomId), {
+          optimisticData: [data, ...messages],
+          rollbackOnError: true,
+        });
       }
-    );
+    });
 
     return () => {
-      pusherClient.unsubscribe(roomId);
+      channel.unbind_all();
+      channel.unsubscribe();
     };
-  }, []);
+  }, [messages, mutate, roomId]);
 
   return (
     <div>
-      {initialMessages.map((message) => (
+      {(messages || initialMessages).map((message) => (
         <p key={message.messageId}>{message.message}</p>
-      ))}
-      {incomingMessages.map((text, i) => (
-        <p key={i}>{text}</p>
       ))}
     </div>
   );

@@ -26,9 +26,13 @@ export async function POST (req: Request) {
         serverPusher.trigger(roomId, 'incoming-message', {
             message,
             roomId,
+            userId,
+            username,
+            createdAt: Date.now(),
             messageId
-        })
+        });
 
+        
 
 
 

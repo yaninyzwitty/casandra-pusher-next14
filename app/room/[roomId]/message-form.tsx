@@ -22,14 +22,22 @@ import {toast} from "sonner";
 
 import {Message} from "@/types";
 import {useParams, useRouter} from "next/navigation";
+import {fetcher} from "@/lib/fetchMessages";
 
 type Props = {
   initialMessages: Message[];
 };
 function MessageForm({initialMessages}: Props) {
   const params = useParams();
+  const {
+    data: messages,
+    isLoading,
+    mutate,
+  } = useSWR<Message[]>("/api/messages", () =>
+    fetcher(params.roomId as string)
+  );
+
   const router = useRouter();
-  const {} = useSWR("/api/messages");
   const form = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
     defaultValues: {
@@ -40,10 +48,16 @@ function MessageForm({initialMessages}: Props) {
   async function onSubmit(values: z.infer<typeof messageSchema>) {
     try {
       const allValues = {...values, roomId: params.roomId};
-      const {data} = await axios.post("/api/messages", allValues);
-      router.refresh();
+      const uploadMessage = async () => {
+        const {data} = await axios.post("/api/messages", allValues);
 
-      toast.success(data.message);
+        return [data.message, ...messages!];
+      };
+
+      await mutate(uploadMessage(), {
+        optimisticData: [values.message as any, ...(messages as Message[])],
+        rollbackOnError: true,
+      });
     } catch (error) {
       toast.error("Something went wrong!");
     }
